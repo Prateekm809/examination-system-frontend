@@ -34,12 +34,14 @@ const Header = () => {
     <header>
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand>Exam-Portal</Navbar.Brand>
+          <Navbar.Brand>
+            <img src="images/logo.svg" alt="Online Examination Logo" style={{ height: '70px' }} />
+            {' '}
+           
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="justify-content-end flex-grow-1 pe-3"
-            >
-         
+            <Nav className="justify-content-end flex-grow-1 pe-3">
               {isLoggedIn ? (
                 <div className="d-flex align-items-center position-relative">
                   <Nav.Link
@@ -65,7 +67,6 @@ const Header = () => {
                         minWidth: '120px',
                       }}
                     >
-                      
                       <LinkContainer to="/profile">
                         <Nav.Link className="text-dark">Profile</Nav.Link>
                       </LinkContainer>
@@ -75,7 +76,7 @@ const Header = () => {
                 </div>
               ) : (
                 <>
-                 <LinkContainer to="/">
+                  <LinkContainer to="/">
                     <Nav.Link>Home</Nav.Link>
                   </LinkContainer>
                   <LinkContainer to="/login">

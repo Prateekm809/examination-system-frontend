@@ -3,6 +3,7 @@ import MyCarousel from '../../components/Carousel'; // Ensure the path is correc
 import StatsCounter from '../../components/StatsCounter';
 import TeamComponent from '../../components/Team';
 import Footer from "../../components/Footer";
+import { Link } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css'
 const Home = () => {
   return (
@@ -19,7 +20,7 @@ const Home = () => {
             <button 
               className="btn btn-primary btn-lg"
             >
-              Start Your Exam
+            <Link to="/login" style={{ color: "white", textDecoration: "none" }}>Start Exam</Link>
             </button>
           </div>
         </div>

@@ -241,7 +241,8 @@ const RegisterPage = () => {
 
                   <Button
                     type="submit"
-                    className="btn btn-primary w-100"
+                    className="btn "
+                    style={{ backgroundColor: "rgb(68 177 49)", color: "white" }}
                     disabled={!validateForm()}
                   >
                     Register
@@ -250,7 +251,7 @@ const RegisterPage = () => {
                 {successMessage && <Alert variant="success" className="mt-3">{successMessage}</Alert>}
                 {errorMessage && <Alert variant="danger" className="mt-3">{errorMessage}</Alert>}
                 <div className="mt-3 text-center">
-                  Already have an account? <Link to="/login">Login</Link>
+                  Already have an account? <Link to="/login" style={{ color: "rgb(68 177 49)" }}>Login</Link>
                 </div>
               </div>
             </div>

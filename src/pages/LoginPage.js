@@ -67,75 +67,135 @@ const LoginPage = () => {
   }, [token, user, navigate]);
 
   return (
-    <FormContainer>
-      <h1>Sign In</h1>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className="my-3" controlId="username">
-          <Form.Label>User Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter User Name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
+    <section className="background-radial-gradient overflow-hidden">
+      <style>
+        {`
+          .background-radial-gradient {
+            background-color: hsl(218, 41%, 15%);
+            background-image: radial-gradient(650px circle at 0% 0%,
+                hsl(218, 41%, 35%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%),
+              radial-gradient(1250px circle at 100% 100%,
+                hsl(218, 41%, 45%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%);
+          }
 
-        <Form.Group className="my-3" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <InputGroup>
-            <Form.Control
-              type={passwordType}
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button
-              onClick={showPasswordHandler}
-              variant=""
-              style={{ border: "1px solid black" }}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </Button>
-          </InputGroup>
-        </Form.Group>
+          #radius-shape-1 {
+            height: 220px;
+            width: 220px;
+            top: -60px;
+            left: -130px;
+            background: radial-gradient(#44006b, #ad1fff);
+            overflow: hidden;
+          }
 
-        <Button
-          variant=""
-          className="my-3"
-          type="submit"
-          style={{ backgroundColor: "rgb(68 177 49)", color: "white" }}
-          disabled={!username || !password} // Disable if username or password is empty
-        >
-          Login
-        </Button>
-      </Form>
+          #radius-shape-2 {
+            border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+            bottom: -60px;
+            right: -110px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(#44006b, #ad1fff);
+            overflow: hidden;
+          }
 
-      {/* Show loader if login is in progress */}
-      {loginReducer.loading && <Loader />}
+          .bg-glass {
+            background-color: hsla(0, 0%, 100%, 0.9) !important;
+            backdrop-filter: saturate(200%) blur(25px);
+          }
+        `}
+      </style>
+      <div className="container px-4 py-5 px-md-5 text-center text-lg-start my-5">
+        <div className="row gx-lg-5 align-items-center mb-5">
+          <div className="col-lg-6 mb-5 mb-lg-0" style={{ zIndex: 10 }}>
+            <h1 className="my-5 display-5 fw-bold ls-tight" style={{ color: 'hsl(218, 81%, 95%)' }}>
+              The best offer <br />
+              <span style={{ color: 'hsl(218, 81%, 75%)' }}>for your business</span>
+            </h1>
+            <p className="mb-4 opacity-70" style={{ color: 'hsl(218, 81%, 85%)' }}>
+              Welcome to our Online Examination platform. Easily manage and participate in online tests with ease and security. Sign up to get started with the best tools for your examination needs.
+            </p>
+          </div>
+          <div className="col-lg-6 mb-5 mb-lg-0 position-relative">
+            <div id="radius-shape-1" className="position-absolute rounded-circle shadow-5-strong"></div>
+            <div id="radius-shape-2" className="position-absolute shadow-5-strong"></div>
+            <div className="card bg-glass">
+              <div className="card-body px-4 py-5 px-md-5">
+                <Form onSubmit={submitHandler}>
+                  <Form.Group className="my-3" controlId="username">
+                    <Form.Label>User Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter User Name"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    ></Form.Control>
+                  </Form.Group>
 
-      {/* Show error message if login fails */}
-      {errorMessage && (
-        <Alert variant="danger" className="my-3">
-          {errorMessage}
-        </Alert>
-      )}
+                  <Form.Group className="my-3" controlId="password">
+                    <Form.Label>Password</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type={passwordType}
+                        placeholder="Enter Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                      <Button
+                        onClick={showPasswordHandler}
+                        variant=""
+                        style={{ border: "1px solid black" }}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </InputGroup>
+                  </Form.Group>
 
-      {/* Show success message when login succeeds */}
-      {successMessage && (
-        <Alert variant="success" className="my-3">
-          {successMessage} {countdown > 0 && <span>{countdown}</span>}
-        </Alert>
-      )}
+                  <Button
+                    variant=""
+                    className="my-3"
+                    type="submit"
+                    style={{ backgroundColor: "rgb(68 177 49)", color: "white" }}
+                    disabled={!username || !password} // Disable if username or password is empty
+                  >
+                    Login
+                  </Button>
+                </Form>
 
-      <Row className="py-3">
-        <Col>
-          New Customer?{" "}
-          <Link to="/register" style={{ color: "rgb(68 177 49)" }}>
-            Register
-          </Link>
-        </Col>
-      </Row>
-    </FormContainer>
+                {loginReducer.loading && <Loader />}
+
+                {errorMessage && (
+                  <Alert variant="danger" className="my-3">
+                    {errorMessage}
+                  </Alert>
+                )}
+
+                {successMessage && (
+                  <Alert variant="success" className="my-3">
+                    {successMessage} {countdown > 0 && <span>{countdown}</span>}
+                  </Alert>
+                )}
+
+                <Row className="py-3">
+                  <Col>
+                    New Customer?{" "}
+                    <Link to="/register" style={{ color: "rgb(68 177 49)" }}>
+                      Register
+                    </Link>
+                  </Col>
+                </Row>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 
