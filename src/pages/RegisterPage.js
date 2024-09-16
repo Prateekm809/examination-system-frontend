@@ -91,123 +91,173 @@ const RegisterPage = () => {
   }, [firstName, lastName, username, password, confirmPassword, phoneNumber]);
 
   return (
-    <FormContainer>
-      <h1>Sign Up</h1>
-      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-      {successMessage && (
-        <Alert variant="success">
-          {successMessage} {countdown > 0 && `Redirecting in ${countdown}...`}
-        </Alert>
-      )}
-      <Form onSubmit={submitHandler}>
-        <Form.Group className="my-3" controlId="fname">
-          <Form.Label>First Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          ></Form.Control>
-        </Form.Group>
+    <section className="background-radial-gradient overflow-hidden">
+      <style>
+        {`
+          .background-radial-gradient {
+            background-color: hsl(218, 41%, 15%);
+            background-image: radial-gradient(650px circle at 0% 0%,
+                hsl(218, 41%, 35%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%),
+              radial-gradient(1250px circle at 100% 100%,
+                hsl(218, 41%, 45%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%);
+          }
 
-        <Form.Group className="my-3" controlId="lname">
-          <Form.Label>Last Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          ></Form.Control>
-        </Form.Group>
+          #radius-shape-1 {
+            height: 220px;
+            width: 220px;
+            top: -60px;
+            left: -130px;
+            background: radial-gradient(#44006b, #ad1fff);
+            overflow: hidden;
+          }
 
-        <Form.Group className="my-3" controlId="username">
-          <Form.Label>User Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter User Name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          ></Form.Control>
-        </Form.Group>
+          #radius-shape-2 {
+            border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+            bottom: -60px;
+            right: -110px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(#44006b, #ad1fff);
+            overflow: hidden;
+          }
 
-        <Form.Group className="my-3" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <InputGroup>
-            <Form.Control
-              type={passwordType}
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            ></Form.Control>
-            <Button
-              onClick={showPasswordHandler}
-              variant=""
-              style={{ border: "1px solid black" }}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </Button>
-          </InputGroup>
-        </Form.Group>
+          .bg-glass {
+            background-color: hsla(0, 0%, 100%, 0.9) !important;
+            backdrop-filter: saturate(200%) blur(25px);
+          }
+        `}
+      </style>
+      <div className="container px-4 py-5 px-md-5 text-center text-lg-start my-5">
+        <div className="row gx-lg-5 align-items-center mb-5">
+          <div className="col-lg-6 mb-5 mb-lg-0" style={{ zIndex: 10 }}>
+            <h1 className="my-5 display-5 fw-bold ls-tight" style={{ color: "hsl(218, 81%, 95%)" }}>
+              Welcome to our <br />
+              <span style={{ color: "hsl(218, 81%, 75%)" }}>Online Examination</span>
+            </h1>
+            <p className="mb-4 opacity-70" style={{ color: "hsl(218, 81%, 85%)" }}>
+              Discover our platform for streamlined and efficient online examinations. We provide a comprehensive solution for your testing needs, ensuring accuracy and ease of use. Get started today to experience seamless examination management.
+            </p>
+          </div>
 
-        <Form.Group className="my-3" controlId="confirmPassword">
-          <Form.Label>Confirm Password</Form.Label>
-          <InputGroup>
-            <Form.Control
-              type={confirmPasswordType}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            ></Form.Control>
-            <Button
-              onClick={showConfirmPasswordHandler}
-              variant=""
-              style={{ border: "1px solid black" }}
-            >
-              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-            </Button>
-          </InputGroup>
-        </Form.Group>
+          <div className="col-lg-6 mb-5 mb-lg-0 position-relative">
+            <div id="radius-shape-1" className="position-absolute rounded-circle shadow-5-strong"></div>
+            <div id="radius-shape-2" className="position-absolute shadow-5-strong"></div>
 
-        <Form.Group className="my-3" controlId="phoneNumber">
-          <Form.Label>Phone Number</Form.Label>
-          <Form.Control
-            type="tel"
-            placeholder="Enter Phone Number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            required
-          ></Form.Control>
-        </Form.Group>
+            <div className="card bg-glass">
+              <div className="card-body px-4 py-5 px-md-5">
+                <Form onSubmit={submitHandler}>
+                  {/* Form fields */}
+                  <Form.Group className="my-3" controlId="fname">
+                    <Form.Label>First Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                    ></Form.Control>
+                  </Form.Group>
 
-        <Button
-          variant=""
-          className="my-3"
-          type="submit"
-          style={{ backgroundColor: "rgb(68 177 49)", color: "white" }}
-          disabled={!validated} // Disable button until form is valid
-        >
-          Register
-        </Button>
-      </Form>
+                  <Form.Group className="my-3" controlId="lname">
+                    <Form.Label>Last Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                    ></Form.Control>
+                  </Form.Group>
 
-      {registerReducer.loading ? (
-        <Loader />
-      ) : (
-        <Row className="py-3">
-          <Col>
-            Have an Account?{" "}
-            <Link to="/" style={{ color: "rgb(68 177 49)" }}>
-              Login
-            </Link>
-          </Col>
-        </Row>
-      )}
-    </FormContainer>
+                  <Form.Group className="my-3" controlId="username">
+                    <Form.Label>User Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter User Name"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    ></Form.Control>
+                  </Form.Group>
+
+                  <Form.Group className="my-3" controlId="password">
+                    <Form.Label>Password</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type={passwordType}
+                        placeholder="Enter Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      ></Form.Control>
+                      <Button
+                        onClick={showPasswordHandler}
+                        variant=""
+                        style={{ border: "1px solid black" }}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </InputGroup>
+                  </Form.Group>
+
+                  <Form.Group className="my-3" controlId="confirmPassword">
+                    <Form.Label>Confirm Password</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type={confirmPasswordType}
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                      ></Form.Control>
+                      <Button
+                        onClick={showConfirmPasswordHandler}
+                        variant=""
+                        style={{ border: "1px solid black" }}
+                      >
+                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </InputGroup>
+                  </Form.Group>
+
+                  <Form.Group className="my-3" controlId="phoneNumber">
+                    <Form.Label>Phone Number</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Phone Number"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      required
+                    ></Form.Control>
+                  </Form.Group>
+
+                  <Button
+                    type="submit"
+                    className="btn btn-primary w-100"
+                    disabled={!validateForm()}
+                  >
+                    Register
+                  </Button>
+                </Form>
+                {successMessage && <Alert variant="success" className="mt-3">{successMessage}</Alert>}
+                {errorMessage && <Alert variant="danger" className="mt-3">{errorMessage}</Alert>}
+                <div className="mt-3 text-center">
+                  Already have an account? <Link to="/login">Login</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 
