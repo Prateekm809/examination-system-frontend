@@ -35,7 +35,7 @@ const Header = () => {
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
           <Navbar.Brand>
-            <img src="images/logo.svg" alt="Online Examination Logo" style={{ height: '70px' }} />
+            <img src="images/logo.svg" alt="Online Examination Logo" style={{ height: '45px' }} />
             {' '}
            
           </Navbar.Brand>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "./UserQuestionsPage.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import swal from "sweetalert";
 import * as quizResultConstants from "../../constants/quizResultConstants";
 import { submitQuiz } from "../../actions/quizResultActions";
 import { fetchQuizzes } from "../../actions/quizzesActions";
-import { useTimer } from "react-timer-hook"; // Importing the react-timer-hook
+import { useTimer } from "react-timer-hook";
 
 const UserQuestionsPage = () => {
   Number.prototype.zeroPad = function () {
@@ -33,23 +33,163 @@ const UserQuestionsPage = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user ? user.userId : null;
   const [timeRemaining, setTimeRemaining] = useState(questions.length * 2 * 60);
-  const [copyWarnings, setCopyWarnings] = useState(0);
-  const [resizeWarnings, setResizeWarnings] = useState(0);
-  const [tabWarnings, setTabWarnings] = useState(0);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isSubmitted, setIsSubmitted] = useState(false); // Track submission status
+  let answers = {};
+
+  const [copyAttempts, setCopyAttempts] = useState(() => {
+    const saved = localStorage.getItem("copyAttempts");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [tabSwitchAttempts, setTabSwitchAttempts] = useState(() => {
+    const saved = localStorage.getItem("tabSwitchAttempts");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [resizeAttempts, setResizeAttempts] = useState(() => {
+    const saved = localStorage.getItem("resizeAttempts");
+    return saved ? parseInt(saved, 10) : 0;
+  });
 
   // React-timer-hook
   const expiryTimestamp = new Date();
   expiryTimestamp.setSeconds(expiryTimestamp.getSeconds() + timeRemaining);
 
-  const { seconds, minutes } = useTimer({
+  const { seconds, minutes, restart } = useTimer({
     expiryTimestamp,
-    onExpire: () => submitQuizHandler(true),
+    onExpire: () => submitQuizHandler(true, "Time's up!"),
   });
+
+  const submitQuizHandler = useCallback(
+    (isAutoSubmit = false, reason = "") => {
+      if (isSubmitted) {
+        swal(
+          "Already Submitted",
+          "You have already submitted this quiz.",
+          "info"
+        );
+        return;
+      }
+
+      const answers = JSON.parse(localStorage.getItem("answers"));
+
+      const submitAction = () => {
+        submitQuiz(dispatch, userId, quizId, answers, token).then((data) => {
+          if (data.type === quizResultConstants.ADD_QUIZ_RESULT_SUCCESS) {
+            swal(
+              "Quiz Submitted!",
+              `You scored ${data.payload.totalObtainedMarks} marks in ${quizTitle} quiz.`,
+              "success"
+            );
+          } else {
+            swal("Quiz Submitted", "Your answers have been recorded.", "info");
+          }
+          setIsSubmitted(true); // Update the submission status
+          navigate("/quizResults");
+        });
+      };
+
+      if (isAutoSubmit) {
+        swal(
+          "Quiz Auto-Submitted",
+          `The quiz has been automatically submitted. Reason: ${reason}`,
+          "warning"
+        ).then(submitAction);
+      } else {
+        swal({
+          title: "Are you sure?",
+          text: "Once submitted, you will not be able to modify your answers!",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        }).then((willSubmit) => {
+          if (willSubmit) {
+            submitAction();
+          }
+        });
+      }
+
+      // Clear localStorage
+      localStorage.removeItem("copyAttempts");
+      localStorage.removeItem("tabSwitchAttempts");
+      localStorage.removeItem("resizeAttempts");
+      localStorage.removeItem("timeRemaining");
+    },
+    [dispatch, userId, quizId, quizTitle, token, navigate, isSubmitted]
+  );
+
+  const checkAndSubmitIfNeeded = useCallback(
+    (attempts, type) => {
+      if (attempts >= 3) {
+        submitQuizHandler(true, `3 ${type} attempts detected`);
+      }
+    },
+    [submitQuizHandler]
+  );
+
+  const handleCopy = useCallback(
+    (e) => {
+      e.preventDefault();
+      const newAttempts = copyAttempts + 1;
+      setCopyAttempts(newAttempts);
+      localStorage.setItem("copyAttempts", newAttempts);
+      swal(
+        "Warning",
+        `Copy attempt detected. You have made ${newAttempts} out of 3 allowed attempts.`,
+        "warning"
+      );
+      checkAndSubmitIfNeeded(newAttempts, "copy");
+    },
+    [copyAttempts, checkAndSubmitIfNeeded]
+  );
+
+  const handleVisibilityChange = useCallback(() => {
+    if (document.hidden) {
+      const newAttempts = tabSwitchAttempts + 1;
+      setTabSwitchAttempts(newAttempts);
+      localStorage.setItem("tabSwitchAttempts", newAttempts);
+      swal(
+        "Warning",
+        `Tab switch detected. You have made ${newAttempts} out of 3 allowed attempts.`,
+        "warning"
+      );
+      checkAndSubmitIfNeeded(newAttempts, "tab switch");
+    }
+  }, [tabSwitchAttempts, checkAndSubmitIfNeeded]);
+
+  const handleResize = useCallback(() => {
+    const newAttempts = resizeAttempts + 1;
+    setResizeAttempts(newAttempts);
+    localStorage.setItem("resizeAttempts", newAttempts);
+    swal(
+      "Warning",
+      `Window resize detected. You have made ${newAttempts} out of 3 allowed attempts.`,
+      "warning"
+    );
+    checkAndSubmitIfNeeded(newAttempts, "resize");
+  }, [resizeAttempts, checkAndSubmitIfNeeded]);
 
   useEffect(() => {
     if (!localStorage.getItem("jwtToken")) navigate("/");
-  }, [navigate]);
+
+    // Add event listeners
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("resize", handleResize);
+
+    // Restore timer state
+    const savedTime = localStorage.getItem("timeRemaining");
+    if (savedTime) {
+      const newTime = new Date();
+      newTime.setSeconds(newTime.getSeconds() + parseInt(savedTime, 10));
+      restart(newTime);
+    }
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [handleCopy, handleVisibilityChange, handleResize, navigate, restart]);
 
   useEffect(() => {
     if (quizzes.length === 0) {
@@ -59,7 +199,7 @@ const UserQuestionsPage = () => {
         setQuiz(temp.filter((q) => q.quizId === quizId)[0]);
       });
     }
-  }, [dispatch, token, quizzes.length, quizId]);
+  }, [dispatch, quizId, quizzes.length, token]);
 
   useEffect(() => {
     fetchQuestionsByQuiz(dispatch, quizId, token).then((data) => {
@@ -68,148 +208,20 @@ const UserQuestionsPage = () => {
     });
   }, [dispatch, quizId, token]);
 
-  // Handle online/offline status
+  // Save timer state
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setResizeWarnings((prev) => {
-        const newCount = prev + 1;
-        if (newCount === 2) {
-          alert(`Warning: You have resized the window ${newCount} times. Your exam will be submitted if you resize again.`);
-        } else if (newCount >= 3) {
-          alert(`Exam submitted. You resized the window ${newCount} times.`);
-          submitQuizHandler(true); // Automatically submit exam
-        }
-        return newCount;
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Handle tab switching
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        setTabWarnings((prev) => {
-          const newCount = prev + 1;
-          if (newCount === 2) {
-            alert(`Warning: You have switched tabs ${newCount} times. Your exam will be submitted if you switch tabs again.`);
-          } else if (newCount >= 3) {
-            alert(`Exam submitted. You switched tabs ${newCount} times.`);
-            submitQuizHandler(true); // Automatically submit exam
-          }
-          return newCount;
-        });
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  // Handle copy attempts
-  useEffect(() => {
-    const handleCopy = (e) => {
-      e.preventDefault();
-      setCopyWarnings((prev) => {
-        const newCount = prev + 1;
-        if (newCount === 2) {
-          alert(`Warning: You have attempted to copy text ${newCount} times. Your exam will be submitted if you copy again.`);
-        } else if (newCount >= 3) {
-          alert(`Exam submitted. You attempted to copy text ${newCount} times.`);
-          submitQuizHandler(true); // Automatically submit exam
-        }
-        return newCount;
-      });
-    };
-
-    document.addEventListener('copy', handleCopy);
-
-    return () => {
-      document.removeEventListener('copy', handleCopy);
-    };
-  }, []);
-
-  const submitQuizHandler = (isTimesUp = false) => {
-    const answers = JSON.parse(localStorage.getItem("answers"));
-    if (isTimesUp) {
-      submitQuiz(dispatch, userId, quizId, answers, token).then((data) => {
-        if (data.type === quizResultConstants.ADD_QUIZ_RESULT_SUCCESS) {
-          swal(
-            "Quiz Submitted!",
-            `You scored ${data.payload.totalObtainedMarks} marks in ${quizTitle} quiz.`,
-            "success"
-          );
-          return navigate("/quizResults");
-        } else {
-          swal(
-            "Quiz not Submitted!",
-            `${quizTitle} is still active. You can modify your answers`,
-            "info"
-          );
-          return navigate("/quizResults");
-        }
-      });
-    } else {
-      swal({
-        title: "Are you sure?",
-        text: "Once submitted, you will not be able to modify your answers!",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      }).then((willSubmit) => {
-        if (willSubmit) {
-          submitQuiz(dispatch, userId, quizId, answers, token).then((data) => {
-            if (data.type === quizResultConstants.ADD_QUIZ_RESULT_SUCCESS) {
-              swal(
-                "Quiz Submitted!",
-                `You scored ${data.payload.totalObtainedMarks} marks in ${quizTitle} quiz.`,
-                "success"
-              );
-              return navigate("/quizResults");
-            } else {
-              swal(
-                "Quiz not Submitted!",
-                `${quizTitle} is still active. You can modify your answers`,
-                "info"
-              );
-            
-            }
-          });
-        }
-      });
-    }
-  };
+    localStorage.setItem("timeRemaining", minutes * 60 + seconds);
+  }, [minutes, seconds]);
 
   return (
     <div className="userQuestionsPage__container">
       <div className="userQuestionsPage__content">
-        <h2>{`Questions : ${quizTitle}`}</h2>
+        <h2>{`Questions: ${quizTitle}`}</h2>
         <div className="userQuestionsPage__content--options">
           <Button
             className="userQuestionsPage__content--button"
             onClick={() => submitQuizHandler()}
+            disabled={isSubmitted} // Disable button if quiz is submitted
           >
             Submit Quiz
           </Button>
@@ -219,6 +231,11 @@ const UserQuestionsPage = () => {
             </h4>
             Timer
           </div>
+        </div>
+        <div className="userQuestionsPage__content--attempts">
+          <p>Copy Attempts: {copyAttempts}/3</p>
+          <p>Tab Switch Attempts: {tabSwitchAttempts}/3</p>
+          <p>Resize Attempts: {resizeAttempts}/3</p>
         </div>
         {questions ? (
           questions.map((q, index) => (
