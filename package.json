@@ -8,7 +8,7 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
-    "bootstrap": "^5.2.0",
+    "bootstrap": "^5.3.3",
     "exam-portal-frontend": "file:",
     "http-proxy-middleware": "^2.0.6",
     "react": "^18.2.0",
@@ -50,5 +50,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.11"
   }
 }

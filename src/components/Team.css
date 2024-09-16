@@ -1,0 +1,11 @@
+/* src/components/TeamComponent.css */
+.custom-scrollbar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  
+  .custom-scrollbar {
+    -ms-overflow-style: none; 
+  }  
+  .team-component {
+    margin-bottom: 20vh; /* Adjust as needed */
+  }

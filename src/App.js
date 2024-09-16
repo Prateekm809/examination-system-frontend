@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header";
+
 import AdminAddCategoryPage from "./pages/admin/categories/AdminAddCategoryPage";
 import AdminCategoriesPage from "./pages/admin/categories/AdminCategoriesPage";
 import AdminUpdateCategoryPage from "./pages/admin/categories/AdminUpdateCategoryPage";
@@ -19,13 +20,13 @@ import UserQuizManualPage from "./pages/users/UserQuizManualPage";
 import UserQuestionsPage from "./pages/users/UserQuestionsPage";
 import UserQuizResultPage from "./pages/users/UserQuizResultPage";
 import AdminQuizResultPage from "./pages/admin/AdminQuizResultPage";
-
+import Home from "./pages/Home/Home";
 const App = () => {
   return (
     <Router>
       <Header />
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/adminProfile" element={<AdminProfilePage />} />
@@ -52,6 +53,7 @@ const App = () => {
         <Route path="/questions/" element={<UserQuestionsPage />} />
         <Route path="/quizResults/" element={<UserQuizResultPage />} />
       </Routes>
+      
     </Router>
   );
 };

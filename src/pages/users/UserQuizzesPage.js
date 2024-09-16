@@ -96,7 +96,7 @@ const UserQuizzesPage = () => {
                             className="userQuizzesPage__content--Button"
                             onClick={() => console.log("View")}
                             style={{ color: "black", backgroundColor: "white" }}
-                          >{`Marks : ${q.numOfQuestions * 5}`}</div>
+                          >{`Marks : ${q.numOfQuestions * 1}`}</div>
                         </div>
                       </Card.Body>
                     </Card>

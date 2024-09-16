@@ -33,8 +33,10 @@ const UserQuestionsPage = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user ? user.userId : null;
   const [timeRemaining, setTimeRemaining] = useState(questions.length * 2 * 60);
-  let answers = {};
-  let intervalId = null;
+  const [copyWarnings, setCopyWarnings] = useState(0);
+  const [resizeWarnings, setResizeWarnings] = useState(0);
+  const [tabWarnings, setTabWarnings] = useState(0);
+  const [isOnline, setIsOnline] = useState(true);
 
   // React-timer-hook
   const expiryTimestamp = new Date();
@@ -47,23 +49,106 @@ const UserQuestionsPage = () => {
 
   useEffect(() => {
     if (!localStorage.getItem("jwtToken")) navigate("/");
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
-    if (quizzes.length == 0) {
+    if (quizzes.length === 0) {
       fetchQuizzes(dispatch, token).then((data) => {
         const temp = data.payload;
         setQuizzes(temp);
-        setQuiz(temp.filter((q) => q.quizId == quizId)[0]);
+        setQuiz(temp.filter((q) => q.quizId === quizId)[0]);
       });
     }
-  }, []);
+  }, [dispatch, token, quizzes.length, quizId]);
 
   useEffect(() => {
     fetchQuestionsByQuiz(dispatch, quizId, token).then((data) => {
       setQuestions(data.payload);
       setTimeRemaining(data.payload.length * 2 * 60);
     });
+  }, [dispatch, quizId, token]);
+
+  // Handle online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setResizeWarnings((prev) => {
+        const newCount = prev + 1;
+        if (newCount === 2) {
+          alert(`Warning: You have resized the window ${newCount} times. Your exam will be submitted if you resize again.`);
+        } else if (newCount >= 3) {
+          alert(`Exam submitted. You resized the window ${newCount} times.`);
+          submitQuizHandler(true); // Automatically submit exam
+        }
+        return newCount;
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Handle tab switching
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        setTabWarnings((prev) => {
+          const newCount = prev + 1;
+          if (newCount === 2) {
+            alert(`Warning: You have switched tabs ${newCount} times. Your exam will be submitted if you switch tabs again.`);
+          } else if (newCount >= 3) {
+            alert(`Exam submitted. You switched tabs ${newCount} times.`);
+            submitQuizHandler(true); // Automatically submit exam
+          }
+          return newCount;
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Handle copy attempts
+  useEffect(() => {
+    const handleCopy = (e) => {
+      e.preventDefault();
+      setCopyWarnings((prev) => {
+        const newCount = prev + 1;
+        if (newCount === 2) {
+          alert(`Warning: You have attempted to copy text ${newCount} times. Your exam will be submitted if you copy again.`);
+        } else if (newCount >= 3) {
+          alert(`Exam submitted. You attempted to copy text ${newCount} times.`);
+          submitQuizHandler(true); // Automatically submit exam
+        }
+        return newCount;
+      });
+    };
+
+    document.addEventListener('copy', handleCopy);
+
+    return () => {
+      document.removeEventListener('copy', handleCopy);
+    };
   }, []);
 
   const submitQuizHandler = (isTimesUp = false) => {
@@ -109,14 +194,12 @@ const UserQuestionsPage = () => {
                 `${quizTitle} is still active. You can modify your answers`,
                 "info"
               );
-              return navigate("/quizResults");
+            
             }
           });
         }
       });
     }
-    clearInterval(intervalId);
-    intervalId = null;
   };
 
   return (
@@ -138,9 +221,9 @@ const UserQuestionsPage = () => {
           </div>
         </div>
         {questions ? (
-          questions.map((q, index) => {
-            return <Question key={index} number={index + 1} question={q} />;
-          })
+          questions.map((q, index) => (
+            <Question key={index} number={index + 1} question={q} />
+          ))
         ) : (
           <Loader />
         )}
