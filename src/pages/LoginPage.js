@@ -13,9 +13,9 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
-  const [errorMessage, setErrorMessage] = useState(null); // New state for error handling
-  const [successMessage, setSuccessMessage] = useState(null); // New state for success handling
-  const [countdown, setCountdown] = useState(3); // New state for countdown
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [countdown, setCountdown] = useState(3);
   const token = JSON.parse(localStorage.getItem("jwtToken"));
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -26,22 +26,23 @@ const LoginPage = () => {
   const showPasswordHandler = () => {
     const temp = !showPassword;
     setShowPassword(temp);
-    if (temp) {
-      setPasswordType("text");
-    } else {
-      setPasswordType("password");
-    }
+    setPasswordType(temp ? "text" : "password");
   };
 
   const submitHandler = (e) => {
     e.preventDefault();
-    setErrorMessage(null); // Clear previous error message
-    setSuccessMessage(null); // Clear previous success message
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (!username || !password) {
+      setErrorMessage("Please fill in both username and password.");
+      return;
+    }
 
     login(dispatch, username, password).then((data) => {
       if (data.type === authConstants.USER_LOGIN_SUCCESS) {
         setSuccessMessage("Logged in successfully! Redirecting in 3 seconds...");
-        
+
         // Start countdown and redirect after 3 seconds
         const timer = setInterval(() => {
           setCountdown((prevCount) => prevCount - 1);
@@ -49,16 +50,10 @@ const LoginPage = () => {
 
         setTimeout(() => {
           clearInterval(timer);
-          data.payload.roles.map((r) => {
-            if (r["roleName"] === "ADMIN") {
-              return navigate("/adminProfile");
-            } else {
-              return navigate("/profile");
-            }
-          });
+          const role = data.payload.roles.find((r) => r.roleName === "ADMIN");
+          navigate(role ? "/adminProfile" : "/profile");
         }, 3000); // 3 seconds delay
       } else if (data.type === authConstants.USER_LOGIN_FAILURE) {
-        // Set error message if login fails
         setErrorMessage("Invalid username or password. Please try again.");
       }
     });
@@ -66,10 +61,8 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (token && user) {
-      user.roles.map((r) => {
-        if (r["roleName"] === "ADMIN") return navigate("/adminProfile");
-        else return navigate("/profile");
-      });
+      const role = user.roles.find((r) => r.roleName === "ADMIN");
+      navigate(role ? "/adminProfile" : "/profile");
     }
   }, [token, user, navigate]);
 
@@ -83,9 +76,7 @@ const LoginPage = () => {
             type="text"
             placeholder="Enter User Name"
             value={username}
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
+            onChange={(e) => setUsername(e.target.value)}
           ></Form.Control>
         </Form.Group>
 
@@ -96,9 +87,7 @@ const LoginPage = () => {
               type={passwordType}
               placeholder="Enter Password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <Button
               onClick={showPasswordHandler}
@@ -115,6 +104,7 @@ const LoginPage = () => {
           className="my-3"
           type="submit"
           style={{ backgroundColor: "rgb(68 177 49)", color: "white" }}
+          disabled={!username || !password} // Disable if username or password is empty
         >
           Login
         </Button>
