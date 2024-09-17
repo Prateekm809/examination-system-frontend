@@ -86,7 +86,7 @@ export const categoriesReducer = (state = categoriesInitialState, action) => {
     case categoriesConstants.UPDATE_CATEGORY_SUCCESS:
       const temp2 = state.categories;
       temp2.forEach((cat) => {
-        if (cat.catId == action.payload.catId) {
+        if (cat.catId === action.payload.catId) {
           cat.title = action.payload.title;
           cat.description = action.payload.description;
         }

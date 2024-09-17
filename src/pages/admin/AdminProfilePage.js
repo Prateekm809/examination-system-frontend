@@ -60,6 +60,10 @@ const AdminProfilePage = () => {
               <td>{user.roles[0].roleName}</td>
             </tr>
             <tr>
+              <td>Email</td>
+              <td>{`${user.email}`}</td>
+            </tr>
+            <tr>
               <td>Status</td>
               <td>{`${user.active}`}</td>
             </tr>

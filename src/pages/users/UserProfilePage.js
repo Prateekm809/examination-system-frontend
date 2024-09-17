@@ -56,6 +56,10 @@ const UserProfilePage = () => {
                 <td>{user.phoneNumber}</td>
               </tr>
               <tr>
+                <td>Email</td>
+                <td>{user.email}</td>
+              </tr>
+              <tr>
                 <td>Role</td>
                 <td>{user.roles[0].roleName}</td>
               </tr>

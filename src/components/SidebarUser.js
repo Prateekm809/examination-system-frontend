@@ -57,9 +57,9 @@ const SidebarUser = ({ children }) => {
     >
       <div style={{ width: isOpen ? "12em" : "3em" }} className="sidebar">
         <div className="top_section">
-          {/* <h1 style={{ display: isOpen ? "block" : "none" }} className="logo">
-            Logo
-          </h1> */}
+          <h1 style={{ display: isOpen ? "block" : "none" }} className="logo">
+            OES
+          </h1>
           <div style={{ marginLeft: isOpen ? "50px" : "0px" }} className="bars">
             <FaBars onClick={toggle} />
           </div>
