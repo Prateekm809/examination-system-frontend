@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { register } from "../actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../components/Loader";
-import { Form, Button, InputGroup, Row, Col, Alert } from "react-bootstrap";
-import FormContainer from "../components/FormContainer";
+import { Form, Button, InputGroup, Alert } from "react-bootstrap";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import * as authConstants from "../constants/authConstants";
 import { Link } from "react-router-dom";
@@ -16,6 +15,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,11 +49,12 @@ const RegisterPage = () => {
       password.trim() !== "" &&
       confirmPassword.trim() !== "" &&
       phoneNumber.trim() !== "" &&
+      email.trim() !== "" &&
       password === confirmPassword
     );
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
       setErrorMessage("Please fill all the fields correctly.");
@@ -66,10 +67,13 @@ const RegisterPage = () => {
       username,
       password,
       phoneNumber,
+      email,
     };
 
-    register(dispatch, user).then((data) => {
-      if (data.type === authConstants.USER_REGISTER_SUCCESS) {
+    try {
+      const response = await register(dispatch, user);
+
+      if (response.type === authConstants.USER_REGISTER_SUCCESS) {
         setSuccessMessage("Registration successful! Redirecting to login...");
         setErrorMessage(""); // Clear error message
         let timer = setInterval(() => {
@@ -79,16 +83,28 @@ const RegisterPage = () => {
           clearInterval(timer);
           navigate("/login");
         }, 3000);
-      } else {
-        setErrorMessage("Registration failed. Please try again.");
+      } else if (response.type === authConstants.USER_LOGIN_FAILURE) {
         setSuccessMessage(""); // Clear success message
+
+        if (response.error === "Username already exists") {
+          setErrorMessage("Username is already taken. Please choose a different one.");
+        } else if (response.error === "Email already exists") {
+          setErrorMessage("Email is already in use. Please choose a different one.");
+        } else if (response.error === "Phone number already exists") {
+          setErrorMessage("Phone number is already registered. Please use a different one.");
+        } else {
+          setErrorMessage("Registration failed. Please try again.");
+        }
       }
-    });
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred. Please try again.");
+      setSuccessMessage(""); // Clear success message
+    }
   };
 
   useEffect(() => {
     setValidated(validateForm());
-  }, [firstName, lastName, username, password, confirmPassword, phoneNumber]);
+  }, [firstName, lastName, username, password, confirmPassword, phoneNumber, email]);
 
   return (
     <section className="background-radial-gradient overflow-hidden">
@@ -188,6 +204,17 @@ const RegisterPage = () => {
                     ></Form.Control>
                   </Form.Group>
 
+                  <Form.Group className="my-3" controlId="email">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    ></Form.Control>
+                  </Form.Group>
+
                   <Form.Group className="my-3" controlId="password">
                     <Form.Label>Password</Form.Label>
                     <InputGroup>
@@ -263,3 +290,4 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
+

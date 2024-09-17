@@ -17,9 +17,9 @@ export const register = async (dispatch, user) => {
   }
 };
 
-export const login = async (dispatch, username, password) => {
+export const login = async (dispatch, usernameOrEmail, password) => {
   dispatch({ type: authConstants.USER_LOGIN_REQUEST });
-  const data = await authServices.login(username, password);
+  const data = await authServices.login(usernameOrEmail, password);
   if (data && data.user) {
     return dispatch({
       type: authConstants.USER_LOGIN_SUCCESS,

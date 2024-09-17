@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const PasswordReset = () => {
+  const [step, setStep] = useState('sendCode'); // Track the current step (sendCode or resetPassword)
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  // Handle sending reset code
+  const handleSendCode = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('https://examination-system-backend-production.up.railway.app/api/send-reset-code', { email });
+      setMessage(response.data);  // Show success message
+      setStep('resetPassword');   // Move to the next step
+    } catch (error) {
+      setMessage('Failed to send reset code. Please try again.');
+    }
+  };
+
+  // Handle resetting the password
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('https://examination-system-backend-production.up.railway.app/api/reset-password', {
+        email,
+        code,
+        newPassword,
+      });
+      setMessage(response.data);  // Show success message
+    } catch (error) {
+      setMessage('Failed to reset password. Please try again.');
+    }
+  };
+
+  return (
+    <section className="background-radial-gradient overflow-hidden" style={{ minHeight: "100vh", display: "flex", alignItems: "center" }}>
+      <style>
+        {`
+          .background-radial-gradient {
+            background-color: hsl(218, 41%, 15%);
+            background-image: radial-gradient(650px circle at 0% 0%,
+                hsl(218, 41%, 35%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%),
+              radial-gradient(1250px circle at 100% 100%,
+                hsl(218, 41%, 45%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%);
+          }
+
+          #radius-shape-1 {
+            height: 220px;
+            width: 220px;
+            top: -60px;
+            left: -130px;
+            background: radial-gradient(#44006b, #ad1fff);
+            overflow: hidden;
+          }
+
+          #radius-shape-2 {
+            border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+            bottom: -60px;
+            right: -110px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(#44006b, #ad1fff);
+            overflow: hidden;
+          }
+
+          .bg-glass {
+            background-color: hsla(0, 0%, 100%, 0.9) !important;
+            backdrop-filter: saturate(200%) blur(25px);
+          }
+
+          .form-group {
+            margin-bottom: 1.5rem;
+          }
+
+          .btn-submit {
+            background-color: rgb(68, 177, 49);
+            color: white;
+            border: none;
+          }
+
+          .btn-submit:hover {
+            background-color: rgb(50, 150, 30);
+          }
+        `}
+      </style>
+      <div className="container px-4 py-5 px-md-5 text-center text-lg-start my-5">
+        <div className="row gx-lg-5 align-items-center mb-5">
+          <div className="col-lg-6 mb-5 mb-lg-0" style={{ zIndex: 10 }}>
+            <h1 className="my-5 display-5 fw-bold ls-tight" style={{ color: "hsl(218, 81%, 95%)" }}>
+              Password Reset
+            </h1>
+          </div>
+          <div className="col-lg-6 mb-5 mb-lg-0 position-relative">
+            <div id="radius-shape-1" className="position-absolute rounded-circle shadow-5-strong"></div>
+            <div id="radius-shape-2" className="position-absolute shadow-5-strong"></div>
+            <div className="card bg-glass">
+              <div className="card-body px-4 py-5 px-md-5">
+                {step === 'sendCode' ? (
+                  <div>
+                    <h2>Request Password Reset</h2>
+                    <form onSubmit={handleSendCode}>
+                      <div className="form-group">
+                        <label htmlFor="email">Email:</label>
+                        <input 
+                          type="email" 
+                          id="email"
+                          className="form-control"
+                          value={email} 
+                          onChange={(e) => setEmail(e.target.value)} 
+                          required 
+                        />
+                      </div>
+                      <button type="submit" className="btn btn-submit">
+                        Send Reset Code
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <div>
+                    <h2>Reset Password</h2>
+                    <form onSubmit={handleResetPassword}>
+                      <div className="form-group">
+                        <label htmlFor="code">Code:</label>
+                        <input 
+                          type="text" 
+                          id="code"
+                          className="form-control"
+                          value={code} 
+                          onChange={(e) => setCode(e.target.value)} 
+                          required 
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="newPassword">New Password:</label>
+                        <input 
+                          type="password" 
+                          id="newPassword"
+                          className="form-control"
+                          value={newPassword} 
+                          onChange={(e) => setNewPassword(e.target.value)} 
+                          required 
+                        />
+                      </div>
+                      <button type="submit" className="btn btn-submit">
+                        Reset Password
+                      </button>
+                    </form>
+                  </div>
+                )}
+                {message && <p>{message}</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PasswordReset;
