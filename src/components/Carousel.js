@@ -1,4 +1,3 @@
-// src/components/Carousel.js
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -27,24 +26,44 @@ const Carousel = () => {
   }, []);
 
   return (
-    <div id="carouselExampleControls" className="carousel slide" style={{ height: '60vh' }}>
-      <div className="carousel-inner" style={{ height: '100%' }}>
+    <div id="carouselExampleControls" className="carousel slide">
+      <div className="carousel-inner">
         {images.map((image, index) => (
           <div key={index} className={`carousel-item ${index === currentIndex ? 'active' : ''}`}>
             <img
               src={image}
               className="d-block w-100"
               alt={`Slide ${index}`}
-              style={{ height: '100%', objectFit: 'cover' }}
+              style={{
+                height: '60vh', // Default height for larger screens
+                objectFit: 'cover',
+                width: '100%',
+                // Full height on small screens (576px and below)
+                '@media (maxWidth: 576px)': {
+                  height: '100vh',
+                }
+              }}
             />
           </div>
         ))}
       </div>
-      <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev" onClick={prevSlide}>
+      <button
+        className="carousel-control-prev"
+        type="button"
+        data-bs-target="#carouselExampleControls"
+        data-bs-slide="prev"
+        onClick={prevSlide}
+      >
         <span className="carousel-control-prev-icon" aria-hidden="true"></span>
         <span className="visually-hidden">Previous</span>
       </button>
-      <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next" onClick={nextSlide}>
+      <button
+        className="carousel-control-next"
+        type="button"
+        data-bs-target="#carouselExampleControls"
+        data-bs-slide="next"
+        onClick={nextSlide}
+      >
         <span className="carousel-control-next-icon" aria-hidden="true"></span>
         <span className="visually-hidden">Next</span>
       </button>
