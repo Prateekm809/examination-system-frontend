@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 const PasswordReset = () => {
   const [step, setStep] = useState('sendCode'); // Track the current step (sendCode or resetPassword)
@@ -7,6 +8,8 @@ const PasswordReset = () => {
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [countdown, setCountdown] = useState(0); // State for countdown
+  const navigate = useNavigate(); // Initialize useNavigate
 
   // Handle sending reset code
   const handleSendCode = async (e) => {
@@ -29,11 +32,28 @@ const PasswordReset = () => {
         code,
         newPassword,
       });
-      setMessage(response.data);  // Show success message
+     
+      setCountdown(3); // Start countdown
     } catch (error) {
       setMessage('Failed to reset password. Please try again.');
     }
   };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prevCount) => prevCount - 1);
+      }, 1000);
+
+      // Redirect to login page after countdown finishes
+      if (countdown === 1) {
+        navigate('/login'); // Adjust the path as needed
+      }
+
+      return () => clearInterval(timer);
+    }
+  }, [countdown, navigate]);
 
   return (
     <section className="background-radial-gradient overflow-hidden" style={{ minHeight: "100vh", display: "flex", alignItems: "center" }}>
@@ -159,6 +179,7 @@ const PasswordReset = () => {
                   </div>
                 )}
                 {message && <p>{message}</p>}
+                {countdown > 0 && <p>Redirecting to login in {countdown} seconds...</p>}
               </div>
             </div>
           </div>

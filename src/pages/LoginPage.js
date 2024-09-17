@@ -38,7 +38,7 @@ const LoginPage = () => {
 
     login(dispatch, identifier, password).then((data) => {
       if (data.type === authConstants.USER_LOGIN_SUCCESS) {
-        setSuccessMessage("Logged in successfully! Redirecting in 3 seconds...");
+        setSuccessMessage("Logged in successfully! Redirecting in...");
 
         // Start countdown and redirect after 3 seconds
         const timer = setInterval(() => {
