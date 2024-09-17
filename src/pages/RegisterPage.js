@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../actions/authActions";
-import { useDispatch, useSelector } from "react-redux";
-import Loader from "../components/Loader";
 import { Form, Button, InputGroup, Alert } from "react-bootstrap";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import * as authConstants from "../constants/authConstants";
 import { Link } from "react-router-dom";
+import authServices from "../services/authServices"; // Adjust the import path as needed
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState("");
@@ -22,23 +19,18 @@ const RegisterPage = () => {
   const [confirmPasswordType, setConfirmPasswordType] = useState("password");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [countdown, setCountdown] = useState(3);
-  const [validated, setValidated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const registerReducer = useSelector((state) => state.registerReducer);
 
   const showPasswordHandler = () => {
-    const temp = !showPassword;
-    setShowPassword(temp);
-    setPasswordType(temp ? "text" : "password");
+    setShowPassword(!showPassword);
+    setPasswordType(showPassword ? "password" : "text");
   };
 
   const showConfirmPasswordHandler = () => {
-    const temp = !showConfirmPassword;
-    setShowConfirmPassword(temp);
-    setConfirmPasswordType(temp ? "text" : "password");
+    setShowConfirmPassword(!showConfirmPassword);
+    setConfirmPasswordType(showConfirmPassword ? "password" : "text");
   };
 
   const validateForm = () => {
@@ -71,41 +63,30 @@ const RegisterPage = () => {
     };
 
     try {
-      const response = await register(dispatch, user);
+      setIsLoading(true);
+      const response = await authServices.register(user);
 
-      if (response.type === authConstants.USER_REGISTER_SUCCESS) {
+      if (response.isRegistered) {
         setSuccessMessage("Registration successful! Redirecting to login...");
         setErrorMessage(""); // Clear error message
-        let timer = setInterval(() => {
-          setCountdown((prev) => prev - 1);
-        }, 1000);
         setTimeout(() => {
-          clearInterval(timer);
           navigate("/login");
         }, 3000);
-      } else if (response.type === authConstants.USER_LOGIN_FAILURE) {
+      } else {
         setSuccessMessage(""); // Clear success message
-
-        if (response.error === "Username already exists") {
-          setErrorMessage("Username is already taken. Please choose a different one.");
-        } else if (response.error === "Email already exists") {
-          setErrorMessage("Email is already in use. Please choose a different one.");
-        } else if (response.error === "Phone number already exists") {
-          setErrorMessage("Phone number is already registered. Please use a different one.");
-        } else {
-          setErrorMessage("Registration failed. Please try again.");
-        }
+        setErrorMessage(response.error || "Registration failed. Please try again."); // Display the error message from response
       }
     } catch (error) {
       setErrorMessage("An unexpected error occurred. Please try again.");
-      setSuccessMessage(""); // Clear success message
+      setSuccessMessage("");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    setValidated(validateForm());
+    // Optional: Add validation logic here if needed
   }, [firstName, lastName, username, password, confirmPassword, phoneNumber, email]);
-
   return (
     <section className="background-radial-gradient overflow-hidden">
       <style>

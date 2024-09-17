@@ -8,38 +8,55 @@ const PasswordReset = () => {
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState(''); // State to handle errors
   const [countdown, setCountdown] = useState(0); // State for countdown
   const navigate = useNavigate(); // Initialize useNavigate
 
   // Handle sending reset code
   const handleSendCode = async (e) => {
     e.preventDefault();
+    setError(''); // Reset error state before attempting request
+    setMessage('');
+    
     try {
       const response = await axios.post('https://examination-system-backend-production.up.railway.app/api/send-reset-code', { email });
-      setMessage(response.data);  // Show success message
+      setMessage('Reset code sent to your email.');
       setStep('resetPassword');   // Move to the next step
     } catch (error) {
-      setMessage('Failed to send reset code. Please try again.');
+      if (error.response && error.response.status === 404) {
+        setError('Email not found. Please check your email and try again.');
+      } else {
+        setError('Failed to send reset code. Please try again later.');
+      }
     }
   };
 
   // Handle resetting the password
   const handleResetPassword = async (e) => {
     e.preventDefault();
+    setError(''); // Reset error state before attempting request
+    setMessage('');
+    
     try {
       const response = await axios.post('https://examination-system-backend-production.up.railway.app/api/reset-password', {
         email,
         code,
         newPassword,
       });
-     
-      setCountdown(3); // Start countdown
+      setMessage('Password reset successful. You will be redirected to login.');
+      setCountdown(3); // Start countdown for redirection
     } catch (error) {
-      setMessage('Failed to reset password. Please try again.');
+      if (error.response && error.response.status === 400) {
+        setError('Invalid or expired OTP. Please try again.');
+      } else if (error.response && error.response.status === 404) {
+        setError('User not found for the given email. Please check the details.');
+      } else {
+        setError('Failed to reset password. Please try again later.');
+      }
     }
   };
 
-  // Countdown timer effect
+  // Countdown timer effect for redirection after password reset
   useEffect(() => {
     if (countdown > 0) {
       const timer = setInterval(() => {
@@ -179,6 +196,7 @@ const PasswordReset = () => {
                   </div>
                 )}
                 {message && <p>{message}</p>}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
                 {countdown > 0 && <p>Redirecting to login in {countdown} seconds...</p>}
               </div>
             </div>
